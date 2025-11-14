@@ -4,19 +4,21 @@ import numpy as np
 import pandas as pd
 from pymongo import MongoClient
 from pathlib import Path
+from dataclasses import dataclass
+
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 from src.constant import *
 from src.exception import CustomException
 from src.logger import logging
-
 from src.utils.main_utils import MainUtils
-from dataclasses import dataclass
-
 
 @dataclass
 class DataIngestionConfig:
-    data_ingestion_dir: str = os.path.join(artifact_folder)
-    raw_data_path: str = os.path.join(data_ingestion_dir, "card_data.csv")
-
+    data_ingestion_dir: str = os.path.join(artifact_folder) 
+    raw_data_path: str = os.path.join(data_ingestion_dir, "Card_data.csv")
 
 class DataIngestion:
     def __init__(self):
@@ -24,22 +26,12 @@ class DataIngestion:
         self.utils = MainUtils()
 
     def export_collection_as_dataframe(self, collection_name, db_name):
-        """
-        Method Name :   export_collection_as_dataframe
-        Description :   This method exports MongoDB collection as a pandas DataFrame
-        
-        Output      :   DataFrame containing collection data
-        On Failure  :   Write an exception log and then raise an exception
-        
-        Version     :   1.0
-        """
         try:
             mongo_client = MongoClient("mongodb://localhost:27017")
-            
             database = mongo_client["Credit_card"]
             collection = database["Credit"]
             
-            logging.info(f"Connecting to MongoDB - Database: {Credit_card}, Collection: {Credit}")
+            logging.info(f"Connecting to MongoDB - Database: {database}, Collection: {collection}")
             
             df = pd.DataFrame(list(collection.find()))
             
@@ -65,31 +57,25 @@ class DataIngestion:
         """
         Method Name :   export_data_into_raw_data_dir
         Description :   This method reads data from MongoDB and saves it into artifacts
-        
-        Output      :   dataset is returned as a pd.DataFrame
-        On Failure  :   Write an exception log and then raise an exception
-        
-        Version     :   1.0
         """
         try:
             logging.info("Exporting data from MongoDB")
             
-            # Create raw data directory if it doesn't exist
             raw_data_dir = self.data_ingestion_config.data_ingestion_dir
             os.makedirs(raw_data_dir, exist_ok=True)
             logging.info(f"Created directory: {raw_data_dir}")
-            
-            # Get raw data path
+
             raw_data_path = self.data_ingestion_config.raw_data_path
+            db_name = "Credit_card"
+            collection_name = "Credit"
             
-            # Export collection from MongoDB
-            logging.info(f"Fetching data from MongoDB - Database: {MONGO_DATABASE_NAME}, Collection: {MONGO_COLLECTION_NAME}")
+            logging.info(f"Fetching data from MongoDB - Database: {db_name}, Collection: {collection_name}")
+            
             dataset = self.export_collection_as_dataframe(
-                db_name=MONGO_DATABASE_NAME,
-                collection_name=MONGO_COLLECTION_NAME
+                db_name=db_name,
+                collection_name=collection_name
             )
             
-            # Save dataset to CSV
             logging.info(f"Saving exported data to: {raw_data_path}")
             dataset.to_csv(raw_data_path, index=False)
             logging.info(f"Successfully saved {len(dataset)} records to CSV")
@@ -100,25 +86,13 @@ class DataIngestion:
             raise CustomException(e, sys)
 
     def initiate_data_ingestion(self) -> str:
-        """
-        Method Name :   initiate_data_ingestion
-        Description :   This method initiates the data ingestion components of training pipeline
-        
-        Output      :   path to raw data CSV file
-        On Failure  :   Write an exception log and then raise an exception
-        
-        Version     :   1.2
-        Revisions   :   moved setup to cloud
-        """
         logging.info("Entered initiate_data_ingestion method of DataIngestion class")
 
         try:
-            # Export data from MongoDB to CSV
             self.export_data_into_raw_data_dir()
             
             logging.info("Successfully retrieved data from MongoDB")
             
-            # Verify file exists
             if not os.path.exists(self.data_ingestion_config.raw_data_path):
                 raise FileNotFoundError(f"Raw data file not created at: {self.data_ingestion_config.raw_data_path}")
             
