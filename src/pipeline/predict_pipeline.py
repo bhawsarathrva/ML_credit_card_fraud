@@ -1,15 +1,19 @@
 import shutil
-import os,sys
-import pandas as pd
-from src.logger import logging
-
-from src.exception import CustomException
+import os
 import sys
+import pandas as pd
+from pathlib import Path
+from dataclasses import dataclass
 from flask import request
+
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from src.logger import logging
+from src.exception import CustomException
 from src.constant import *
 from src.utils.main_utils import MainUtils
-
-from dataclasses import dataclass
         
         
 @dataclass

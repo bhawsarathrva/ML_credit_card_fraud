@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Fraud Detection - Predict</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-shield-alt"></i> Credit Card Fraud Detection</h1>
+                <nav class="nav-menu">
+                    <a href="/" class="nav-link"><i class="fas fa-home"></i> Home</a>
+                    <a href="/predict" class="nav-link active"><i class="fas fa-upload"></i> Predict</a>
+                    <a href="/train" class="nav-link"><i class="fas fa-cog"></i> Train</a>
+                    <a href="/health" class="nav-link"><i class="fas fa-heartbeat"></i> Health</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="predict-container">
+                <div class="predict-header">
+                    <h2><i class="fas fa-upload"></i> Upload CSV for Prediction</h2>
+                    <p>Upload a CSV file containing credit card transaction data to detect fraudulent transactions</p>
+                </div>
+
+                <form id="predict-form" action="/predict" method="POST" enctype="multipart/form-data" class="upload-form">
+                    <div class="upload-area" id="upload-area">
+                        <div class="upload-content">
+                            <i class="fas fa-cloud-upload-alt upload-icon-large"></i>
+                            <h3>Drag & Drop your CSV file here</h3>
+                            <p>or</p>
+                            <label for="file-input" class="file-label">
+                                <i class="fas fa-folder-open"></i> Browse Files
+                            </label>
+                            <input type="file" id="file-input" name="file" accept=".csv" required class="file-input">
+                            <p class="file-info">Only CSV files are supported</p>
+                        </div>
+                        <div id="file-preview" class="file-preview" style="display: none;">
+                            <i class="fas fa-file-csv"></i>
+                            <span id="file-name"></span>
+                            <button type="button" class="remove-file" onclick="removeFile()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn" id="submit-btn">
+                            <i class="fas fa-search"></i> Predict Fraud
+                        </button>
+                        <button type="button" class="cancel-btn" onclick="window.location.href='/'">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+
+                <div class="instructions">
+                    <h3><i class="fas fa-info-circle"></i> Instructions</h3>
+                    <ul>
+                        <li>Upload a CSV file with transaction data</li>
+                        <li>Ensure the file contains all required features</li>
+                        <li>The system will analyze and predict fraudulent transactions</li>
+                        <li>Results will be downloaded automatically</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 Credit Card Fraud Detection System. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p id="loading-message">Processing your file...</p>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const uploadArea = document.getElementById('upload-area');
+        const filePreview = document.getElementById('file-preview');
+        const fileName = document.getElementById('file-name');
+        const form = document.getElementById('predict-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingMessage = document.getElementById('loading-message');
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].name.endsWith('.csv')) {
+                fileInput.files = files;
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (!file.name.endsWith('.csv')) {
+                alert('Please upload a CSV file');
+                return;
+            }
+            fileName.textContent = file.name;
+            filePreview.style.display = 'flex';
+            document.querySelector('.upload-content').style.display = 'none';
+        }
+
+        function removeFile() {
+            fileInput.value = '';
+            filePreview.style.display = 'none';
+            document.querySelector('.upload-content').style.display = 'block';
+        }
+
+        form.addEventListener('submit', (e) => {
+            if (!fileInput.files.length) {
+                e.preventDefault();
+                alert('Please select a file to upload');
+                return;
+            }
+
+            loadingOverlay.style.display = 'flex';
+            loadingMessage.textContent = 'Uploading and processing file...';
+            submitBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>
+

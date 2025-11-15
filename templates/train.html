@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Fraud Detection - Training</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-shield-alt"></i> Credit Card Fraud Detection</h1>
+                <nav class="nav-menu">
+                    <a href="/" class="nav-link"><i class="fas fa-home"></i> Home</a>
+                    <a href="/predict" class="nav-link"><i class="fas fa-upload"></i> Predict</a>
+                    <a href="/train" class="nav-link active"><i class="fas fa-cog"></i> Train</a>
+                    <a href="/health" class="nav-link"><i class="fas fa-heartbeat"></i> Health</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="train-container">
+                <div class="train-header">
+                    <h2><i class="fas fa-cog"></i> Model Training</h2>
+                    <p>Train the machine learning model with data from MongoDB</p>
+                </div>
+
+                <div class="train-info">
+                    <div class="info-card">
+                        <h3><i class="fas fa-list-ol"></i> Training Pipeline Steps</h3>
+                        <ol class="steps-list">
+                            <li id="step1">
+                                <i class="fas fa-database"></i>
+                                <div>
+                                    <strong>Data Ingestion</strong>
+                                    <p>Extract data from MongoDB database</p>
+                                </div>
+                            </li>
+                            <li id="step2">
+                                <i class="fas fa-exchange-alt"></i>
+                                <div>
+                                    <strong>Data Transformation</strong>
+                                    <p>Preprocess and transform the data</p>
+                                </div>
+                            </li>
+                            <li id="step3">
+                                <i class="fas fa-brain"></i>
+                                <div>
+                                    <strong>Model Training</strong>
+                                    <p>Train the machine learning model</p>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <div class="action-section">
+                        <button onclick="startTraining()" class="train-btn" id="train-btn">
+                            <i class="fas fa-play"></i> Start Training
+                        </button>
+                        <div id="training-status" class="training-status" style="display: none;">
+                            <div class="status-message">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <span id="status-text">Training in progress...</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="progress-fill" class="progress-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="training-results" id="training-results" style="display: none;">
+                    <h3><i class="fas fa-check-circle"></i> Training Results</h3>
+                    <div class="result-card">
+                        <p><strong>Status:</strong> <span id="result-status"></span></p>
+                        <p><strong>Message:</strong> <span id="result-message"></span></p>
+                        <p id="result-score" style="display: none;"><strong>Model Score:</strong> <span id="score-value"></span></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 Credit Card Fraud Detection System. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p id="loading-message">Training model...</p>
+    </div>
+
+    <script>
+        async function startTraining() {
+            const trainBtn = document.getElementById('train-btn');
+            const trainingStatus = document.getElementById('training-status');
+            const statusText = document.getElementById('status-text');
+            const progressFill = document.getElementById('progress-fill');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const loadingMessage = document.getElementById('loading-message');
+            const trainingResults = document.getElementById('training-results');
+            const resultStatus = document.getElementById('result-status');
+            const resultMessage = document.getElementById('result-message');
+
+            // Reset UI
+            trainBtn.disabled = true;
+            trainingStatus.style.display = 'block';
+            trainingResults.style.display = 'none';
+            loadingOverlay.style.display = 'flex';
+            
+            // Reset steps
+            ['step1', 'step2', 'step3'].forEach(step => {
+                document.getElementById(step).classList.remove('active', 'completed');
+            });
+
+            // Simulate progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 10;
+                if (progress <= 100) {
+                    progressFill.style.width = progress + '%';
+                }
+            }, 1000);
+
+            // Update steps
+            setTimeout(() => {
+                document.getElementById('step1').classList.add('active');
+                statusText.textContent = 'Step 1: Data Ingestion from MongoDB...';
+            }, 500);
+
+            setTimeout(() => {
+                document.getElementById('step1').classList.remove('active');
+                document.getElementById('step1').classList.add('completed');
+                document.getElementById('step2').classList.add('active');
+                statusText.textContent = 'Step 2: Data Transformation...';
+            }, 5000);
+
+            setTimeout(() => {
+                document.getElementById('step2').classList.remove('active');
+                document.getElementById('step2').classList.add('completed');
+                document.getElementById('step3').classList.add('active');
+                statusText.textContent = 'Step 3: Model Training...';
+            }, 10000);
+
+            try {
+                const response = await fetch('/train');
+                const data = await response.json();
+
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
+
+                setTimeout(() => {
+                    document.getElementById('step3').classList.remove('active');
+                    document.getElementById('step3').classList.add('completed');
+                    
+                    if (response.ok) {
+                        resultStatus.textContent = 'Success';
+                        resultStatus.className = 'success';
+                        resultMessage.textContent = data.message || 'Training completed successfully!';
+                        trainingResults.style.display = 'block';
+                        statusText.textContent = 'Training completed!';
+                    } else {
+                        resultStatus.textContent = 'Failed';
+                        resultStatus.className = 'error';
+                        resultMessage.textContent = data.message || 'Training failed';
+                        trainingResults.style.display = 'block';
+                        statusText.textContent = 'Training failed';
+                    }
+
+                    loadingOverlay.style.display = 'none';
+                    trainBtn.disabled = false;
+                }, 2000);
+            } catch (error) {
+                clearInterval(progressInterval);
+                resultStatus.textContent = 'Error';
+                resultStatus.className = 'error';
+                resultMessage.textContent = 'An error occurred: ' + error.message;
+                trainingResults.style.display = 'block';
+                loadingOverlay.style.display = 'none';
+                trainBtn.disabled = false;
+                statusText.textContent = 'Training failed';
+            }
+        }
+    </script>
+</body>
+</html>
+
