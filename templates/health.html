@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Fraud Detection - Health Check</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-shield-alt"></i> Credit Card Fraud Detection</h1>
+                <nav class="nav-menu">
+                    <a href="/" class="nav-link"><i class="fas fa-home"></i> Home</a>
+                    <a href="/predict" class="nav-link"><i class="fas fa-upload"></i> Predict</a>
+                    <a href="/train" class="nav-link"><i class="fas fa-cog"></i> Train</a>
+                    <a href="/health" class="nav-link active"><i class="fas fa-heartbeat"></i> Health</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="health-container">
+                <div class="health-header">
+                    <h2><i class="fas fa-heartbeat"></i> System Health Check</h2>
+                    <p>Monitor MongoDB connection and system status</p>
+                </div>
+
+                <div class="health-status {{ 'healthy' if status == 'healthy' else 'unhealthy' }}">
+                    <i class="fas {{ 'fa-check-circle' if status == 'healthy' else 'fa-exclamation-circle' }}"></i>
+                    <div>
+                        <h3>System Status: {{ status.upper() }}</h3>
+                        <p>MongoDB: {{ mongodb }}</p>
+                    </div>
+                </div>
+
+                <div class="health-details">
+                    <div class="detail-card">
+                        <h3><i class="fas fa-database"></i> Database Information</h3>
+                        <div class="detail-item">
+                            <strong>Database Name:</strong> <span>{{ database }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Collection Name:</strong> <span>{{ collection }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Document Count:</strong> <span>{{ document_count }}</span>
+                        </div>
+                    </div>
+
+                    {% if error %}
+                    <div class="error-card">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Error Details</h3>
+                        <p>{{ error }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="action-section">
+                        <button onclick="refreshHealth()" class="refresh-btn">
+                            <i class="fas fa-sync-alt"></i> Refresh Status
+                        </button>
+                        <a href="/" class="action-btn">
+                            <i class="fas fa-home"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 Credit Card Fraud Detection System. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        function refreshHealth() {
+            window.location.reload();
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(refreshHealth, 30000);
+    </script>
+</body>
+</html>
+

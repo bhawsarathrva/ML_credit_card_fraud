@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Fraud Detection - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-shield-alt"></i> Credit Card Fraud Detection System</h1>
+                <nav class="nav-menu">
+                    <a href="/" class="nav-link active"><i class="fas fa-home"></i> Home</a>
+                    <a href="/predict" class="nav-link"><i class="fas fa-upload"></i> Predict</a>
+                    <a href="/train" class="nav-link"><i class="fas fa-cog"></i> Train Model</a>
+                    <a href="/health" class="nav-link"><i class="fas fa-heartbeat"></i> Health</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="dashboard">
+                <div class="welcome-section">
+                    <h2>Welcome to Fraud Detection System</h2>
+                    <p>Advanced machine learning system for detecting credit card fraud</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>MongoDB Status</h3>
+                            <p id="mongodb-status" class="stat-value">Checking...</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Documents</h3>
+                            <p id="document-count" class="stat-value">-</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Model Status</h3>
+                            <p id="model-status" class="stat-value">Ready</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Database</h3>
+                            <p class="stat-value">{{ database_name }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-cards">
+                    <div class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-upload"></i>
+                        </div>
+                        <h3>Make Predictions</h3>
+                        <p>Upload a CSV file to detect fraudulent transactions</p>
+                        <a href="/predict" class="action-btn">Go to Predictions <i class="fas fa-arrow-right"></i></a>
+                    </div>
+
+                    <div class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <h3>Train Model</h3>
+                        <p>Retrain the machine learning model with latest data</p>
+                        <button onclick="trainModel()" class="action-btn">Start Training <i class="fas fa-play"></i></button>
+                    </div>
+
+                    <div class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <h3>System Health</h3>
+                        <p>Check MongoDB connection and system status</p>
+                        <a href="/health" class="action-btn">Check Health <i class="fas fa-heartbeat"></i></a>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3><i class="fas fa-info-circle"></i> System Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Database:</strong> <span>{{ database_name }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Collection:</strong> <span>{{ collection_name }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Status:</strong> <span id="system-status">Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 Credit Card Fraud Detection System. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p id="loading-message">Processing...</p>
+    </div>
+
+    <script>
+        // Load dashboard stats
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                document.getElementById('mongodb-status').textContent = data.mongodb_connected ? 'Connected' : 'Disconnected';
+                document.getElementById('mongodb-status').className = data.mongodb_connected ? 'stat-value success' : 'stat-value error';
+                
+                if (data.document_count !== undefined) {
+                    document.getElementById('document-count').textContent = data.document_count.toLocaleString();
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Train model function
+        async function trainModel() {
+            const overlay = document.getElementById('loading-overlay');
+            const message = document.getElementById('loading-message');
+            
+            overlay.style.display = 'flex';
+            message.textContent = 'Starting training pipeline...';
+            
+            try {
+                const response = await fetch('/train', {
+                    method: 'GET'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    message.textContent = 'Training completed successfully!';
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                        alert('Training completed successfully!');
+                        loadDashboardStats();
+                    }, 2000);
+                } else {
+                    throw new Error(data.message || 'Training failed');
+                }
+            } catch (error) {
+                message.textContent = 'Training failed: ' + error.message;
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    alert('Training failed: ' + error.message);
+                }, 3000);
+            }
+        }
+
+        // Load stats on page load
+        loadDashboardStats();
+        setInterval(loadDashboardStats, 30000); // Refresh every 30 seconds
+    </script>
+</body>
+</html>
+

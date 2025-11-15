@@ -1,84 +1,772 @@
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:700,300);
-.frame {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 400px;
-  height: 400px;
-  margin-top: -200px;
-  margin-left: -200px;
-  border-radius: 2px;
-  box-shadow: 4px 8px 16px 0 rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  background: linear-gradient(to top right, darkmagenta 0%, hotpink 100%);
-  color: #333;
-  font-family: "Open Sans", Helvetica, sans-serif;
+/* Modern CSS for Credit Card Fraud Detection System */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 300px;
-  height: 260px;
-  border-radius: 3px;
-  box-shadow: 8px 10px 15px 0 rgba(0, 0, 0, 0.2);
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
-  flex-direction: column;
+:root {
+    --primary-color: #6366f1;
+    --secondary-color: #8b5cf6;
+    --success-color: #10b981;
+    --error-color: #ef4444;
+    --warning-color: #f59e0b;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-.title {
-  width: 100%;
-  height: 50px;
-  border-bottom: 1px solid #999;
-  text-align: center;
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: var(--text-primary);
+    line-height: 1.6;
 }
 
-h1 {
-  font-size: 16px;
-  font-weight: 300;
-  color: #666;
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-.dropzone {
-  width: 100px;
-  height: 80px;
-  border: 1px dashed #999;
-  border-radius: 3px;
-  text-align: center;
+/* Header Styles */
+.header {
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+    padding: 1.5rem 0;
+    margin-bottom: 2rem;
+    border-radius: 0 0 15px 15px;
 }
 
-.upload-icon {
-  margin: 25px 2px 2px 2px;
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
-.upload-input {
-  position: relative;
-  top: -62px;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
+.header h1 {
+    font-size: 1.75rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.btn {
-  display: block;
-  width: 140px;
-  height: 40px;
-  background: darkmagenta;
-  color: #fff;
-  border-radius: 3px;
-  border: 0;
-  box-shadow: 0 3px 0 0 hotpink;
-  transition: all 0.3s ease-in-out;
-  font-size: 14px;
+.nav-menu {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
-.btn:hover {
-  background: rebeccapurple;
-  box-shadow: 0 3px 0 0 deeppink;
+.nav-link {
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    color: var(--text-secondary);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    background: var(--bg-color);
+    color: var(--primary-color);
+}
+
+.nav-link.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding-bottom: 2rem;
+}
+
+/* Dashboard Styles */
+.dashboard {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.welcome-section {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.welcome-section h2 {
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.welcome-section p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    opacity: 0.9;
+}
+
+.stat-info h3 {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.stat-value.success {
+    color: #10b981;
+}
+
+.stat-value.error {
+    color: #ef4444;
+}
+
+/* Action Cards */
+.action-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.action-card {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.action-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-5px);
+}
+
+.action-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.action-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.action-card p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.action-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    background: var(--secondary-color);
+    transform: scale(1.05);
+}
+
+/* Info Section */
+.info-section {
+    background: var(--bg-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.info-section h3 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.info-item {
+    padding: 0.75rem;
+    background: white;
+    border-radius: 8px;
+}
+
+.info-item strong {
+    color: var(--primary-color);
+}
+
+/* Predict/Upload Styles */
+.predict-container, .train-container {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.predict-header, .train-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.predict-header h2, .train-header h2 {
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.upload-form {
+    margin-bottom: 2rem;
+}
+
+.upload-area {
+    border: 3px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 3rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: var(--bg-color);
+    margin-bottom: 1.5rem;
+}
+
+.upload-area.drag-over {
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.upload-content {
+    display: block;
+}
+
+.upload-icon-large {
+    font-size: 4rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.upload-area h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.file-label {
+    display: inline-block;
+    background: var(--primary-color);
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 1rem 0;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.file-label:hover {
+    background: var(--secondary-color);
+    transform: scale(1.05);
+}
+
+.file-input {
+    display: none;
+}
+
+.file-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 2px solid var(--primary-color);
+}
+
+.file-preview i {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-right: 1rem;
+}
+
+.remove-file {
+    background: var(--error-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.submit-btn, .train-btn {
+    background: var(--success-color);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover, .train-btn:hover {
+    background: #059669;
+    transform: scale(1.05);
+}
+
+.submit-btn:disabled, .train-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cancel-btn {
+    background: var(--text-secondary);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+    background: #475569;
+}
+
+.instructions {
+    background: var(--bg-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.instructions h3 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.instructions ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.instructions li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.instructions li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--success-color);
+    font-weight: bold;
+}
+
+/* Training Styles */
+.train-info {
+    margin-bottom: 2rem;
+}
+
+.info-card {
+    background: var(--bg-color);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.info-card h3 {
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.steps-list {
+    list-style: none;
+    padding: 0;
+}
+
+.steps-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: white;
+    border-radius: 8px;
+    border-left: 4px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.steps-list li.active {
+    border-left-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.steps-list li.completed {
+    border-left-color: var(--success-color);
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.steps-list li i {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.steps-list li.active i {
+    color: var(--primary-color);
+}
+
+.steps-list li.completed i {
+    color: var(--success-color);
+}
+
+.action-section {
+    text-align: center;
+}
+
+.training-status {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--bg-color);
+    border-radius: 12px;
+}
+
+.status-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: var(--border-color);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.training-results {
+    background: var(--bg-color);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+.training-results h3 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.result-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.result-card p {
+    margin-bottom: 0.5rem;
+}
+
+.result-card .success {
+    color: var(--success-color);
+    font-weight: bold;
+}
+
+.result-card .error {
+    color: var(--error-color);
+    font-weight: bold;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    color: white;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+#loading-message {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 2rem 0;
+    color: white;
+    margin-top: 2rem;
+}
+
+/* Health Check Styles */
+.health-container {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.health-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.health-header h2 {
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.health-status {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+.health-status i {
+    font-size: 2rem;
+}
+
+.health-status.healthy {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+    border: 2px solid var(--success-color);
+}
+
+.health-status.unhealthy {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error-color);
+    border: 2px solid var(--error-color);
+}
+
+.health-details {
+    margin-top: 2rem;
+}
+
+.detail-card, .error-card {
+    background: var(--bg-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.detail-card h3, .error-card h3 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.detail-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-item strong {
+    color: var(--primary-color);
+    margin-right: 0.5rem;
+}
+
+.error-card {
+    background: rgba(239, 68, 68, 0.1);
+    border: 2px solid var(--error-color);
+}
+
+.error-card p {
+    color: var(--error-color);
+    font-weight: 500;
+}
+
+.refresh-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    margin-right: 1rem;
+}
+
+.refresh-btn:hover {
+    background: var(--secondary-color);
+    transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .nav-menu {
+        justify-content: center;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .action-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .upload-area {
+        padding: 2rem 1rem;
+    }
 }

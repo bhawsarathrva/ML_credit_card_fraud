@@ -67,8 +67,34 @@ def initialize_mongodb_connection():
 @app.route("/")
 def home():
     """
-    Home route with MongoDB connection status
+    Home route with dashboard
     """
+    try:
+        document_count = 0
+        mongodb_connected = mongo_client is not None and mongo_db is not None
+        
+        if mongo_collection:
+            try:
+                document_count = mongo_collection.count_documents({})
+            except:
+                pass
+        
+        return render_template('index.html', 
+                             database_name=MONGO_DATABASE_NAME,
+                             collection_name=MONGO_COLLECTION_NAME,
+                             mongodb_connected=mongodb_connected,
+                             document_count=document_count)
+    except Exception as e:
+        lg.error(f"Error rendering home page: {e}")
+        return render_template('index.html', 
+                             database_name=MONGO_DATABASE_NAME,
+                             collection_name=MONGO_COLLECTION_NAME,
+                             mongodb_connected=False,
+                             document_count=0)
+
+
+@app.route("/api/status")
+def api_status():
     try:
         status = {
             "status": "running",
@@ -89,6 +115,43 @@ def home():
 def health_check():
     """
     Health check endpoint to verify MongoDB connection
+    """
+    try:
+        if mongo_client is None or mongo_db is None:
+            return render_template('health.html',
+                                 status="unhealthy",
+                                 mongodb="not connected",
+                                 database=MONGO_DATABASE_NAME,
+                                 collection=MONGO_COLLECTION_NAME,
+                                 document_count=0,
+                                 error="MongoDB not initialized")
+
+        mongo_client.admin.command('ping')
+        
+        collection_count = mongo_collection.count_documents({}) if mongo_collection else 0
+        
+        return render_template('health.html',
+                             status="healthy",
+                             mongodb="connected",
+                             database=MONGO_DATABASE_NAME,
+                             collection=MONGO_COLLECTION_NAME,
+                             document_count=collection_count,
+                             error=None)
+    except Exception as e:
+        lg.error(f"Health check failed: {e}")
+        return render_template('health.html',
+                             status="unhealthy",
+                             mongodb="not connected",
+                             database=MONGO_DATABASE_NAME,
+                             collection=MONGO_COLLECTION_NAME,
+                             document_count=0,
+                             error=str(e))
+
+
+@app.route("/api/health")
+def api_health():
+    """
+    API endpoint for health check
     """
     try:
         if mongo_client is None or mongo_db is None:
@@ -115,14 +178,21 @@ def health_check():
         }), 503
 
 
-@app.route("/train")
+@app.route("/train", methods=['GET'])
 def train_route():
     """
-    Training route that executes the complete training pipeline:
-    1. Data Ingestion from MongoDB
-    2. Data Transformation
-    3. Model Training
+    Training route - GET shows training page or triggers training via API
     """
+    # Check if it's an API request
+    wants_json = request.headers.get('Accept', '').find('application/json') != -1
+    
+    if not wants_json:
+        # Render training page
+        return render_template('train.html',
+                             database_name=MONGO_DATABASE_NAME,
+                             collection_name=MONGO_COLLECTION_NAME)
+    
+    # API endpoint for training
     try:
         lg.info("Starting training pipeline...")
         
@@ -145,16 +215,39 @@ def train_route():
         
     except Exception as e:
         lg.error(f"Training pipeline failed: {e}")
-        raise CustomException(e, sys)
+        error_message = str(e)
+        return jsonify({
+            "status": "error",
+            "message": f"Training failed: {error_message}"
+        }), 500
 
 
 @app.route('/predict', methods=['POST', 'GET'])
 def upload():
     """
-    Prediction route for making predictions on uploaded files
+    Prediction route - GET shows upload page, POST processes file
     """
     try:
         if request.method == 'POST':
+            if 'file' not in request.files:
+                return jsonify({
+                    "status": "error",
+                    "message": "No file provided"
+                }), 400
+            
+            file = request.files['file']
+            if file.filename == '':
+                return jsonify({
+                    "status": "error",
+                    "message": "No file selected"
+                }), 400
+            
+            if not file.filename.endswith('.csv'):
+                return jsonify({
+                    "status": "error",
+                    "message": "Only CSV files are supported"
+                }), 400
+            
             lg.info("Starting prediction pipeline...")
             
             prediction_pipeline = PredictionPipeline(request)
@@ -167,18 +260,28 @@ def upload():
                 as_attachment=True
             )
         else:
-            return render_template('upload_file.html')
+            # Render prediction/upload page
+            return render_template('predict.html',
+                                 database_name=MONGO_DATABASE_NAME,
+                                 collection_name=MONGO_COLLECTION_NAME)
             
     except Exception as e:
         lg.error(f"Prediction pipeline failed: {e}")
-        raise CustomException(e, sys)
+        error_message = str(e)
+        if request.method == 'POST':
+            return jsonify({
+                "status": "error",
+                "message": f"Prediction failed: {error_message}"
+            }), 500
+        else:
+            return render_template('predict.html',
+                                 database_name=MONGO_DATABASE_NAME,
+                                 collection_name=MONGO_COLLECTION_NAME,
+                                 error=error_message)
 
 
 @app.route("/mongodb/status")
 def mongodb_status():
-    """
-    Detailed MongoDB connection status endpoint
-    """
     try:
         if mongo_client is None or mongo_db is None:
             return jsonify({

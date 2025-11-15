@@ -1,13 +1,16 @@
-import sys,os
+import sys
+import os
+from pathlib import Path
+
+# Add project root to Python path for imports
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 from src.components.data_ingestion import DataIngestion
 from src.components.data_transformation import DataTransformation
 from src.components.model_trainer import ModelTrainer
 from src.exception import CustomException
-
-
-
-
 
 
 class TraininingPipeline:
