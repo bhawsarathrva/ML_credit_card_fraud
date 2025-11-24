@@ -2,7 +2,7 @@ model_selection:
     model:
       XGBClassifier:
         search_param_grid:
-          max_depth: 
+          max_depth:
            - 3
            - 5
            - 7
