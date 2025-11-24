@@ -37,17 +37,6 @@ class PredictionPipeline:
 
     def save_input_files(self)-> str:
 
-        """
-            Method Name :   save_input_files
-            Description :   This method saves the input file to the prediction artifacts directory. 
-            
-            Output      :   input dataframe
-            On Failure  :   Write an exception log and then raise an exception
-            
-            Version     :   1.2
-            Revisions   :   moved setup to cloud
-        """
-
         try:
             pred_file_input_dir = "prediction_artifacts"
             os.makedirs(pred_file_input_dir, exist_ok=True)
@@ -57,47 +46,33 @@ class PredictionPipeline:
             
             
             input_csv_file.save(pred_file_path)
-
-
+            
             return pred_file_path
         except Exception as e:
             raise CustomException(e,sys)
 
     def predict(self, features):
-            try:
-                model_path = self.prediction_pipeline_config.trained_model_file_path
-                preprocessor_path = self.prediction_pipeline_config.preprocessor_path
+        try:
+            model_path = self.prediction_pipeline_config.trained_model_file_path
+            preprocessor_path = self.prediction_pipeline_config.preprocessor_path
 
 
-                model = self.utils.load_object(file_path=model_path)
-                preprocessor = self.utils.load_object(file_path= preprocessor_path)
+            model = self.utils.load_object(file_path=model_path)
+            preprocessor = self.utils.load_object(file_path= preprocessor_path)
 
-                transformed_features = preprocessor.transform(features)
+            transformed_features = preprocessor.transform(features)
 
 
-                preds = model.predict(transformed_features)
+            preds = model.predict(transformed_features)
 
-                return preds
+            return preds
 
-            except Exception as e:
-                raise CustomException(e, sys)
+        except Exception as e:
+            raise CustomException(e, sys)
         
     def get_predicted_dataframe(self, input_dataframe_path:pd.DataFrame):
 
-        """
-            Method Name :   get_predicted_dataframe
-            Description :   this method returns the dataframw with a new column containing predictions
-
-            
-            Output      :   predicted dataframe
-            On Failure  :   Write an exception log and then raise an exception
-            
-            Version     :   1.2
-            Revisions   :   moved setup to cloud
-        """
-   
         try:
-
             prediction_column_name : str = TARGET_COLUMN
             input_dataframe: pd.DataFrame = pd.read_csv(input_dataframe_path)
             
@@ -128,11 +103,4 @@ class PredictionPipeline:
 
 
         except Exception as e:
-            raise CustomException(e,sys)
-            
-        
-
- 
-        
-
-        
+            raise CustomException(e,sys)        

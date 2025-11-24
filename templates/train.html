@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body>
     <div class="container">
         <header class="header">
@@ -77,7 +79,8 @@
                     <div class="result-card">
                         <p><strong>Status:</strong> <span id="result-status"></span></p>
                         <p><strong>Message:</strong> <span id="result-message"></span></p>
-                        <p id="result-score" style="display: none;"><strong>Model Score:</strong> <span id="score-value"></span></p>
+                        <p id="result-score" style="display: none;"><strong>Model Score:</strong> <span
+                                id="score-value"></span></p>
                     </div>
                 </div>
             </div>
@@ -110,7 +113,7 @@
             trainingStatus.style.display = 'block';
             trainingResults.style.display = 'none';
             loadingOverlay.style.display = 'flex';
-            
+
             // Reset steps
             ['step1', 'step2', 'step3'].forEach(step => {
                 document.getElementById(step).classList.remove('active', 'completed');
@@ -146,7 +149,11 @@
             }, 10000);
 
             try {
-                const response = await fetch('/train');
+                const response = await fetch('/train', {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
                 const data = await response.json();
 
                 clearInterval(progressInterval);
@@ -155,7 +162,7 @@
                 setTimeout(() => {
                     document.getElementById('step3').classList.remove('active');
                     document.getElementById('step3').classList.add('completed');
-                    
+
                     if (response.ok) {
                         resultStatus.textContent = 'Success';
                         resultStatus.className = 'success';
@@ -186,5 +193,5 @@
         }
     </script>
 </body>
-</html>
 
+</html>

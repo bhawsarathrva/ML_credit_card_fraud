@@ -3,9 +3,9 @@ import os
 
 MONGO_DATABASE_NAME = "Credit_card"
 MONGO_COLLECTION_NAME = "Credit"
-MONGO_DB_URL =  "mongodb+srv://hrisikesh:hrisikeshAndineuron@cluster0.iq9nlei.mongodb.net/?retryWrites=true&w=majority"
+MONGO_DB_URL =  "mongodb://localhost:27017"
 
-TARGET_COLUMN = "default payment next month"
+TARGET_COLUMN = "Class"  # 0 = Legitimate, 1 = Fraud
 
 MODEL_FILE_NAME = "model"
 MODEL_FILE_EXTENSION = ".pkl"

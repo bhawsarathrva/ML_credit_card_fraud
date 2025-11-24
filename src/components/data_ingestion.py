@@ -27,17 +27,25 @@ class DataIngestion:
 
     def export_collection_as_dataframe(self, collection_name, db_name):
         try:
-            mongo_client = MongoClient("mongodb://localhost:27017")
-            database = mongo_client["Credit_card"]
-            collection = database["Credit"]
+            # Use constants for MongoDB connection
+            mongo_url = MONGO_DB_URL
+            logging.info(f"Connecting to MongoDB at: {mongo_url}")
             
-            logging.info(f"Connecting to MongoDB - Database: {database}, Collection: {collection}")
+            mongo_client = MongoClient(mongo_url, serverSelectionTimeoutMS=5000)
+            database = mongo_client[db_name]
+            collection = database[collection_name]
+            
+            logging.info(f"Connecting to MongoDB - Database: {db_name}, Collection: {collection_name}")
+            
+            # Test connection
+            mongo_client.admin.command('ping')
+            logging.info("MongoDB connection successful")
             
             df = pd.DataFrame(list(collection.find()))
             
             if df.empty:
                 logging.warning(f"No data found in collection: {collection_name}")
-                raise ValueError(f"Collection {collection_name} is empty")
+                raise ValueError(f"Collection {collection_name} is empty. Please upload data to MongoDB first.")
             
             logging.info(f"Successfully retrieved {len(df)} records from MongoDB")
             
@@ -66,8 +74,10 @@ class DataIngestion:
             logging.info(f"Created directory: {raw_data_dir}")
 
             raw_data_path = self.data_ingestion_config.raw_data_path
-            db_name = "Credit_card"
-            collection_name = "Credit"
+            
+            # Use constants for database and collection names
+            db_name = MONGO_DATABASE_NAME
+            collection_name = MONGO_COLLECTION_NAME
             
             logging.info(f"Fetching data from MongoDB - Database: {db_name}, Collection: {collection_name}")
             

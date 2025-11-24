@@ -18,9 +18,6 @@ mongo_collection = None
 
 
 def initialize_mongodb_connection():
-    """
-    Initialize MongoDB connection and verify database and collection exist
-    """
     global mongo_client, mongo_db, mongo_collection
     
     try:
@@ -66,9 +63,6 @@ def initialize_mongodb_connection():
 
 @app.route("/")
 def home():
-    """
-    Home route with dashboard
-    """
     try:
         document_count = 0
         mongodb_connected = mongo_client is not None and mongo_db is not None
@@ -150,9 +144,6 @@ def health_check():
 
 @app.route("/api/health")
 def api_health():
-    """
-    API endpoint for health check
-    """
     try:
         if mongo_client is None or mongo_db is None:
             return jsonify({
@@ -180,19 +171,13 @@ def api_health():
 
 @app.route("/train", methods=['GET'])
 def train_route():
-    """
-    Training route - GET shows training page or triggers training via API
-    """
-    # Check if it's an API request
     wants_json = request.headers.get('Accept', '').find('application/json') != -1
     
     if not wants_json:
-        # Render training page
         return render_template('train.html',
                              database_name=MONGO_DATABASE_NAME,
                              collection_name=MONGO_COLLECTION_NAME)
     
-    # API endpoint for training
     try:
         lg.info("Starting training pipeline...")
         
