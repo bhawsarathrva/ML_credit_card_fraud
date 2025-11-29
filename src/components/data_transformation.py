@@ -20,6 +20,7 @@ from src.constant import *
 from src.exception import CustomException
 from src.logger import logging
 from src.utils.main_utils import MainUtils
+from src.utils.visualization_utils import VisualizationUtils
 
 
 @dataclass
@@ -67,17 +68,16 @@ class DataTransformation:
 
     def apply_smote_technique(self, X_train, y_train):
         """
-        Applies SMOTE-Tomek (combination of SMOTE oversampling and Tomek undersampling)
-        to handle class imbalance in fraud detection dataset.
+        Applies SMOTE-Tomek and compares with KNN-SMOTE.
+        Generates visualizations for class distribution and sampling comparison.
         
-        SMOTE-Tomek is preferred over KNN-SMOTE for fraud detection because:
-        - It combines oversampling minority class (fraud) with undersampling majority class
-        - Removes Tomek links (borderline/noisy samples)
-        - Better performance on highly imbalanced datasets
+        Returns:
+            X_train_balanced, y_train_balanced (using SMOTE-Tomek as preferred method)
         """
         try:
             logging.info("Checking class distribution before SMOTE...")
-            logging.info(f"Original class distribution: {Counter(y_train)}")
+            original_counts = Counter(y_train)
+            logging.info(f"Original class distribution: {original_counts}")
             
             # Calculate the imbalance ratio
             fraud_count = sum(y_train == 1)
@@ -86,27 +86,88 @@ class DataTransformation:
             
             logging.info(f"Imbalance ratio (legitimate/fraud): {imbalance_ratio:.2f}")
             
-            # Use SMOTE-Tomek for better handling of imbalanced fraud detection data
-            # sampling_strategy: ratio of minority class after resampling
-            # We'll use 0.5 to make fraud cases 50% of legitimate cases (still imbalanced but manageable)
+            # 1. Apply SMOTE-Tomek (Preferred)
+            # sampling_strategy=0.5 -> Fraud will be 50% of legitimate
             smote_tomek = SMOTETomek(
-                sampling_strategy=0.5,  # Fraud will be 50% of legitimate transactions
+                sampling_strategy=0.5,
                 random_state=42,
                 n_jobs=-1
             )
             
-            logging.info("Applying SMOTE-Tomek technique to balance the dataset...")
-            X_train_balanced, y_train_balanced = smote_tomek.fit_resample(X_train, y_train)
+            logging.info("Applying SMOTE-Tomek technique...")
+            X_train_tomek, y_train_tomek = smote_tomek.fit_resample(X_train, y_train)
+            tomek_counts = Counter(y_train_tomek)
+            logging.info(f"Class distribution after SMOTE-Tomek: {tomek_counts}")
             
-            logging.info(f"Class distribution after SMOTE-Tomek: {Counter(y_train_balanced)}")
-            logging.info(f"Training samples increased from {len(y_train)} to {len(y_train_balanced)}")
+            # 2. Apply KNN-SMOTE (Standard SMOTE which uses KNN)
+            # We use this for comparison as requested
+            knn_smote = SMOTENC(
+                categorical_features=[], # No categorical features after scaling if we assume all numerical
+                sampling_strategy=0.5,
+                random_state=42,
+                k_neighbors=5,
+                n_jobs=-1
+            ) if False else None # SMOTENC requires categorical indices. 
+            # Actually, we should use standard SMOTE if all features are numerical.
+            # Let's check imports. We have SMOTENC imported but not SMOTE.
+            # I will use SMOTE from imblearn.over_sampling
             
-            # Save SMOTE object for reference
+            from imblearn.over_sampling import SMOTE
+            knn_smote = SMOTE(
+                sampling_strategy=0.5,
+                random_state=42,
+                k_neighbors=5,
+                n_jobs=-1
+            )
+            
+            logging.info("Applying KNN-SMOTE for comparison...")
+            X_train_knn, y_train_knn = knn_smote.fit_resample(X_train, y_train)
+            knn_counts = Counter(y_train_knn)
+            logging.info(f"Class distribution after KNN-SMOTE: {knn_counts}")
+            
+            # 3. Generate Visualizations
+            viz_dir = os.path.join(artifact_folder, "visualizations")
+            os.makedirs(viz_dir, exist_ok=True)
+            
+            # Plot Original Distribution
+            VisualizationUtils.plot_class_distribution(
+                y_data=y_train,
+                title="Original Class Distribution",
+                save_path=os.path.join(viz_dir, "class_distribution_original.png"),
+                labels=['Legitimate', 'Fraud']
+            )
+            
+            # Plot SMOTE-Tomek Distribution
+            VisualizationUtils.plot_class_distribution(
+                y_data=y_train_tomek,
+                title="Class Distribution After SMOTE-Tomek",
+                save_path=os.path.join(viz_dir, "class_distribution_smote_tomek.png"),
+                labels=['Legitimate', 'Fraud']
+            )
+            
+            # Plot KNN-SMOTE Distribution
+            VisualizationUtils.plot_class_distribution(
+                y_data=y_train_knn,
+                title="Class Distribution After KNN-SMOTE",
+                save_path=os.path.join(viz_dir, "class_distribution_knn_smote.png"),
+                labels=['Legitimate', 'Fraud']
+            )
+            
+            # Plot Comparison
+            VisualizationUtils.plot_sampling_comparison(
+                original_counts=dict(original_counts),
+                smote_tomek_counts=dict(tomek_counts),
+                knn_smote_counts=dict(knn_counts),
+                save_path=os.path.join(viz_dir, "sampling_comparison.png")
+            )
+            
+            # Save SMOTE object (saving the one we use for training)
             smote_path = self.data_transformation_config.smote_object_file_path
             self.utils.save_object(file_path=smote_path, obj=smote_tomek)
             logging.info(f"SMOTE-Tomek object saved at: {smote_path}")
             
-            return X_train_balanced, y_train_balanced
+            # Return SMOTE-Tomek balanced data as it's generally better for fraud
+            return X_train_tomek, y_train_tomek
 
         except Exception as e:
             logging.error("Error occurred while applying SMOTE technique.")

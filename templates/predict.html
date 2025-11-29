@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body>
     <div class="container">
         <header class="header">
@@ -28,7 +30,8 @@
                     <p>Upload a CSV file containing credit card transaction data to detect fraudulent transactions</p>
                 </div>
 
-                <form id="predict-form" action="/predict" method="POST" enctype="multipart/form-data" class="upload-form">
+                <form id="predict-form" action="/predict" method="POST" enctype="multipart/form-data"
+                    class="upload-form">
                     <div class="upload-area" id="upload-area">
                         <div class="upload-content">
                             <i class="fas fa-cloud-upload-alt upload-icon-large"></i>
@@ -56,6 +59,12 @@
                         <button type="button" class="cancel-btn" onclick="window.location.href='/'">
                             <i class="fas fa-times"></i> Cancel
                         </button>
+                    </div>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <a href="/prediction/visualizations" class="nav-link"
+                            style="color: #3498db; text-decoration: none;">
+                            <i class="fas fa-chart-bar"></i> View Last Prediction Visualizations
+                        </a>
                     </div>
                 </form>
 
@@ -146,5 +155,5 @@
         });
     </script>
 </body>
-</html>
 
+</html>

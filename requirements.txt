@@ -28,4 +28,11 @@ mypy-boto3-s3
 types-s3transfer
 wincertstore
 dvc
+
+# Visualization Libraries
+matplotlib
+plotly
+kaleido
+fpdf2
+
 -e .

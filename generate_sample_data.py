@@ -1,8 +1,3 @@
-"""
-Sample Data Generator and Uploader for Credit Card Fraud Detection
-This script generates synthetic credit card transaction data and uploads it to MongoDB
-"""
-
 import pandas as pd
 import numpy as np
 from pymongo import MongoClient

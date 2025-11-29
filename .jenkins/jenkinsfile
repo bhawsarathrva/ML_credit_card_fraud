@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Setup') {
+            steps {
+                echo 'Installing dependencies...'
+                script {
+                    if (isUnix()) {
+                        sh 'pip install -r requirements.txt'
+                    } else {
+                        bat 'pip install -r requirements.txt'
+                    }
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
+                // Add test commands here, e.g., pytest
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo 'Building application...'
+                // Add build steps here
+            }
+        }
+    }
+}

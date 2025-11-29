@@ -1,6 +1,3 @@
-"""
-Quick script to check MongoDB data structure
-"""
 from pymongo import MongoClient
 import pandas as pd
 

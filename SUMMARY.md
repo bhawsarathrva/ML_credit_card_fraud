@@ -426,7 +426,3 @@ Verification:
 └─────────────────────────────────────────────────────────────┘
 ```
 
----
-
-**Built with ❤️ by Athrva Bhawsar**
-**For fraud detection excellence**
