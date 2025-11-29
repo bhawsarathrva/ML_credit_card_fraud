@@ -71,127 +71,112 @@
                                 <div id="progress-fill" class="progress-fill"></div>
                             </div>
                         </div>
+                        <p>&copy; 2025 Credit Card Fraud Detection System. All rights reserved.</p>
+                        </footer>
                     </div>
-                </div>
 
-                <div class="training-results" id="training-results" style="display: none;">
-                    <h3><i class="fas fa-check-circle"></i> Training Results</h3>
-                    <div class="result-card">
-                        <p><strong>Status:</strong> <span id="result-status"></span></p>
-                        <p><strong>Message:</strong> <span id="result-message"></span></p>
-                        <p id="result-score" style="display: none;"><strong>Model Score:</strong> <span
-                                id="score-value"></span></p>
+                    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+                        <div class="spinner"></div>
+                        <p id="loading-message">Training model...</p>
                     </div>
-                </div>
-            </div>
-        </main>
 
-        <footer class="footer">
-            <p>&copy; 2025 Credit Card Fraud Detection System. All rights reserved.</p>
-        </footer>
-    </div>
+                    <script>
+                        async function startTraining() {
+                            const trainBtn = document.getElementById('train-btn');
+                            const trainingStatus = document.getElementById('training-status');
+                            const statusText = document.getElementById('status-text');
+                            const progressFill = document.getElementById('progress-fill');
+                            const loadingOverlay = document.getElementById('loading-overlay');
+                            const loadingMessage = document.getElementById('loading-message');
+                            const trainingResults = document.getElementById('training-results');
+                            const resultStatus = document.getElementById('result-status');
+                            const resultMessage = document.getElementById('result-message');
 
-    <div id="loading-overlay" class="loading-overlay" style="display: none;">
-        <div class="spinner"></div>
-        <p id="loading-message">Training model...</p>
-    </div>
+                            // Reset UI
+                            trainBtn.disabled = true;
+                            trainingStatus.style.display = 'block';
+                            trainingResults.style.display = 'none';
+                            loadingOverlay.style.display = 'flex';
 
-    <script>
-        async function startTraining() {
-            const trainBtn = document.getElementById('train-btn');
-            const trainingStatus = document.getElementById('training-status');
-            const statusText = document.getElementById('status-text');
-            const progressFill = document.getElementById('progress-fill');
-            const loadingOverlay = document.getElementById('loading-overlay');
-            const loadingMessage = document.getElementById('loading-message');
-            const trainingResults = document.getElementById('training-results');
-            const resultStatus = document.getElementById('result-status');
-            const resultMessage = document.getElementById('result-message');
+                            // Reset steps
+                            ['step1', 'step2', 'step3'].forEach(step => {
+                                document.getElementById(step).classList.remove('active', 'completed');
+                            });
 
-            // Reset UI
-            trainBtn.disabled = true;
-            trainingStatus.style.display = 'block';
-            trainingResults.style.display = 'none';
-            loadingOverlay.style.display = 'flex';
+                            // Simulate progress
+                            let progress = 0;
+                            const progressInterval = setInterval(() => {
+                                progress += 10;
+                                if (progress <= 100) {
+                                    progressFill.style.width = progress + '%';
+                                }
+                            }, 1000);
 
-            // Reset steps
-            ['step1', 'step2', 'step3'].forEach(step => {
-                document.getElementById(step).classList.remove('active', 'completed');
-            });
+                            // Update steps
+                            setTimeout(() => {
+                                document.getElementById('step1').classList.add('active');
+                                statusText.textContent = 'Step 1: Data Ingestion from MongoDB...';
+                            }, 500);
 
-            // Simulate progress
-            let progress = 0;
-            const progressInterval = setInterval(() => {
-                progress += 10;
-                if (progress <= 100) {
-                    progressFill.style.width = progress + '%';
-                }
-            }, 1000);
+                            setTimeout(() => {
+                                document.getElementById('step1').classList.remove('active');
+                                document.getElementById('step1').classList.add('completed');
+                                document.getElementById('step2').classList.add('active');
+                                statusText.textContent = 'Step 2: Data Transformation...';
+                            }, 5000);
 
-            // Update steps
-            setTimeout(() => {
-                document.getElementById('step1').classList.add('active');
-                statusText.textContent = 'Step 1: Data Ingestion from MongoDB...';
-            }, 500);
+                            setTimeout(() => {
+                                document.getElementById('step2').classList.remove('active');
+                                document.getElementById('step2').classList.add('completed');
+                                document.getElementById('step3').classList.add('active');
+                                statusText.textContent = 'Step 3: Model Training...';
+                            }, 10000);
 
-            setTimeout(() => {
-                document.getElementById('step1').classList.remove('active');
-                document.getElementById('step1').classList.add('completed');
-                document.getElementById('step2').classList.add('active');
-                statusText.textContent = 'Step 2: Data Transformation...';
-            }, 5000);
+                            try {
+                                const response = await fetch('/train', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Accept': 'application/json'
+                                    }
+                                });
+                                const data = await response.json();
 
-            setTimeout(() => {
-                document.getElementById('step2').classList.remove('active');
-                document.getElementById('step2').classList.add('completed');
-                document.getElementById('step3').classList.add('active');
-                statusText.textContent = 'Step 3: Model Training...';
-            }, 10000);
+                                clearInterval(progressInterval);
+                                progressFill.style.width = '100%';
 
-            try {
-                const response = await fetch('/train', {
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                const data = await response.json();
+                                setTimeout(() => {
+                                    document.getElementById('step3').classList.remove('active');
+                                    document.getElementById('step3').classList.add('completed');
 
-                clearInterval(progressInterval);
-                progressFill.style.width = '100%';
+                                    if (response.ok) {
+                                        resultStatus.textContent = 'Success';
+                                        resultStatus.className = 'success';
+                                        resultMessage.textContent = data.message || 'Training completed successfully!';
+                                        trainingResults.style.display = 'block';
+                                        statusText.textContent = 'Training completed!';
+                                    } else {
+                                        resultStatus.textContent = 'Failed';
+                                        resultStatus.className = 'error';
+                                        resultMessage.textContent = data.message || 'Training failed';
+                                        trainingResults.style.display = 'block';
+                                        statusText.textContent = 'Training failed';
+                                    }
 
-                setTimeout(() => {
-                    document.getElementById('step3').classList.remove('active');
-                    document.getElementById('step3').classList.add('completed');
-
-                    if (response.ok) {
-                        resultStatus.textContent = 'Success';
-                        resultStatus.className = 'success';
-                        resultMessage.textContent = data.message || 'Training completed successfully!';
-                        trainingResults.style.display = 'block';
-                        statusText.textContent = 'Training completed!';
-                    } else {
-                        resultStatus.textContent = 'Failed';
-                        resultStatus.className = 'error';
-                        resultMessage.textContent = data.message || 'Training failed';
-                        trainingResults.style.display = 'block';
-                        statusText.textContent = 'Training failed';
-                    }
-
-                    loadingOverlay.style.display = 'none';
-                    trainBtn.disabled = false;
-                }, 2000);
-            } catch (error) {
-                clearInterval(progressInterval);
-                resultStatus.textContent = 'Error';
-                resultStatus.className = 'error';
-                resultMessage.textContent = 'An error occurred: ' + error.message;
-                trainingResults.style.display = 'block';
-                loadingOverlay.style.display = 'none';
-                trainBtn.disabled = false;
-                statusText.textContent = 'Training failed';
-            }
-        }
-    </script>
+                                    loadingOverlay.style.display = 'none';
+                                    trainBtn.disabled = false;
+                                }, 2000);
+                            } catch (error) {
+                                clearInterval(progressInterval);
+                                resultStatus.textContent = 'Error';
+                                resultStatus.className = 'error';
+                                resultMessage.textContent = 'An error occurred: ' + error.message;
+                                trainingResults.style.display = 'block';
+                                loadingOverlay.style.display = 'none';
+                                trainBtn.disabled = false;
+                                statusText.textContent = 'Training failed';
+                            }
+                        }
+                    </script>
 </body>
 
 </html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Visualizations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .viz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .viz-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .viz-card img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #eee;
+        }
+
+        .viz-card h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-chart-line"></i> Prediction Analysis</h1>
+                <nav class="nav-menu">
+                    <a href="/" class="nav-link"><i class="fas fa-home"></i> Home</a>
+                    <a href="/predict" class="nav-link"><i class="fas fa-upload"></i> Predict</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="viz-container">
+                <h2>Visual Analysis of Last Prediction</h2>
+
+                <div class="viz-grid">
+                    <div class="viz-card">
+                        <h3>Fraud Distribution</h3>
+                        <img src="/predictions/visualizations/fraud_distribution.png" alt="Fraud Distribution"
+                            onerror="this.parentElement.style.display='none'">
+                    </div>
+
+                    <div class="viz-card">
+                        <h3>Amount Distribution</h3>
+                        <img src="/predictions/visualizations/amount_distribution.png" alt="Amount Distribution"
+                            onerror="this.parentElement.style.display='none'">
+                    </div>
+
+                    <div class="viz-card" style="grid-column: 1 / -1;">
+                        <h3>Transaction Timeline</h3>
+                        <img src="/predictions/visualizations/fraud_timeline.png" alt="Fraud Timeline"
+                            onerror="this.parentElement.style.display='none'">
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="/predict" class="train-btn">
+                        <i class="fas fa-arrow-left"></i> Back to Prediction
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

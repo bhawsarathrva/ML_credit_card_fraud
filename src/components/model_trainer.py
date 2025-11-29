@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score,
-    roc_auc_score, confusion_matrix, classification_report
+    roc_auc_score, confusion_matrix, classification_report, roc_curve
 )
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -24,13 +24,16 @@ if str(project_root) not in sys.path:
 from src.constant import *
 from src.exception import CustomException
 from src.logger import logging
+from src.logger import logging
 from src.utils.main_utils import MainUtils
+from src.utils.visualization_utils import VisualizationUtils
 
 
 @dataclass
 class ModelTrainerConfig:
     trained_model_path = os.path.join(artifact_folder, "model.pkl")
     model_report_path = os.path.join(artifact_folder, "model_report.txt")
+    model_report_html_path = os.path.join(artifact_folder, "model_report.html")
     # For fraud detection, we prioritize recall (catching frauds) over accuracy
     expected_recall = 0.75  # We want to catch at least 75% of frauds
     expected_f1_score = 0.70  # Balance between precision and recall
@@ -88,6 +91,11 @@ class ModelTrainer:
                 n_estimators=100,
                 learning_rate=0.1,
                 random_state=42
+            ),
+            "KNN_Smote": KNeighborsClassifier(
+                n_neighbors=3,
+                weights='distance',
+                n_jobs=-1
             )
         }
 
@@ -312,7 +320,14 @@ class ModelTrainer:
             os.makedirs(os.path.dirname(model_path), exist_ok=True)
             
             self.utils.save_object(file_path=model_path, obj=best_model)
+            self.utils.save_object(file_path=model_path, obj=best_model)
             logging.info(f"Best model saved at: {model_path}")
+
+            # Generate Visualizations and HTML Report
+            self.generate_visualizations_and_report(
+                trained_models, best_model, best_model_name, 
+                X_train, y_train, X_test, y_test, results_df
+            )
             
             # Return F1 score as the primary metric
             logging.info("=" * 80)
@@ -324,6 +339,137 @@ class ModelTrainer:
         except Exception as e:
             logging.error("Error occurred during model training.")
             raise CustomException(e, sys)
+
+    def generate_visualizations_and_report(self, trained_models, best_model, best_model_name, 
+                                          X_train, y_train, X_test, y_test, results_df):
+        """
+        Generate comprehensive visualizations and HTML report.
+        """
+        try:
+            logging.info("Generating visualizations and HTML report...")
+            viz_dir = os.path.join(artifact_folder, "visualizations")
+            os.makedirs(viz_dir, exist_ok=True)
+            
+            # 1. ROC Curves for all models
+            roc_data = {}
+            for name, model in trained_models.items():
+                try:
+                    if hasattr(model, 'predict_proba'):
+                        y_proba = model.predict_proba(X_test)[:, 1]
+                        fpr, tpr, _ = roc_curve(y_test, y_proba)
+                        auc = roc_auc_score(y_test, y_proba)
+                        roc_data[name] = (fpr, tpr, auc)
+                except Exception as e:
+                    logging.warning(f"Could not generate ROC for {name}: {e}")
+            
+            VisualizationUtils.plot_multiple_roc_curves(
+                roc_data=roc_data,
+                save_path=os.path.join(viz_dir, "roc_curves.png")
+            )
+            
+            # 2. Confusion Matrix for Best Model
+            y_pred = best_model.predict(X_test)
+            cm = confusion_matrix(y_test, y_pred)
+            VisualizationUtils.plot_confusion_matrix(
+                cm=cm,
+                labels=['Legitimate', 'Fraud'],
+                title=f"Confusion Matrix - {best_model_name}",
+                save_path=os.path.join(viz_dir, "confusion_matrix_best.png")
+            )
+            
+            # 3. Feature Importance (if applicable)
+            if hasattr(best_model, 'feature_importances_'):
+                # Assuming feature names are generic if not provided
+                feature_names = [f"Feature_{i}" for i in range(X_train.shape[1])]
+                # Try to get real feature names if possible (requires passing column names, skipping for now)
+                
+                VisualizationUtils.plot_feature_importance(
+                    importances=best_model.feature_importances_,
+                    feature_names=feature_names,
+                    save_path=os.path.join(viz_dir, "feature_importance.png")
+                )
+            
+            # 4. Create HTML Report
+            self.create_html_report(results_df, best_model_name, viz_dir)
+            
+        except Exception as e:
+            logging.error(f"Error generating visualizations: {str(e)}")
+            # Don't raise exception here to avoid failing the whole pipeline if viz fails
+
+    def create_html_report(self, results_df, best_model_name, viz_dir):
+        """
+        Create a comprehensive HTML report with embedded visualizations.
+        """
+        try:
+            html_path = self.model_trainer_config.model_report_html_path
+            
+            # Convert images to base64 or relative paths
+            # For simplicity, we'll use relative paths assuming the HTML is in artifacts/
+            
+            html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Fraud Detection Model Report</title>
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 20px; color: #333; }}
+                    h1, h2 {{ color: #2c3e50; }}
+                    table {{ border-collapse: collapse; width: 100%; margin-bottom: 20px; }}
+                    th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+                    th {{ background-color: #f2f2f2; }}
+                    tr:nth-child(even) {{ background-color: #f9f9f9; }}
+                    .highlight {{ background-color: #e8f8f5; border-left: 5px solid #2ecc71; padding: 15px; }}
+                    .viz-container {{ display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px; }}
+                    .viz-item {{ flex: 1; min-width: 45%; border: 1px solid #ddd; padding: 10px; border-radius: 5px; }}
+                    img {{ max-width: 100%; height: auto; }}
+                </style>
+            </head>
+            <body>
+                <h1>Credit Card Fraud Detection - Model Evaluation Report</h1>
+                
+                <div class="highlight">
+                    <h2>Best Performing Model: {best_model_name}</h2>
+                    <p>Selected based on F1-Score and Recall balance.</p>
+                </div>
+                
+                <h2>Model Comparison Metrics</h2>
+                {results_df.to_html(index=False, classes='table')}
+                
+                <h2>Visualizations</h2>
+                <div class="viz-container">
+                    <div class="viz-item">
+                        <h3>ROC Curves Comparison</h3>
+                        <img src="visualizations/roc_curves.png" alt="ROC Curves">
+                    </div>
+                    <div class="viz-item">
+                        <h3>Confusion Matrix ({best_model_name})</h3>
+                        <img src="visualizations/confusion_matrix_best.png" alt="Confusion Matrix">
+                    </div>
+                </div>
+                
+                <div class="viz-container">
+                    <div class="viz-item">
+                        <h3>Feature Importance</h3>
+                        <img src="visualizations/feature_importance.png" alt="Feature Importance" onerror="this.style.display='none'">
+                    </div>
+                    <div class="viz-item">
+                        <h3>Class Distribution (Training)</h3>
+                        <img src="visualizations/class_distribution_smote_tomek.png" alt="Class Distribution" onerror="this.style.display='none'">
+                    </div>
+                </div>
+                
+                <p>Generated on: {pd.Timestamp.now()}</p>
+            </body>
+            </html>
+            """
+            
+            with open(html_path, 'w') as f:
+                f.write(html_content)
+                
+            logging.info(f"HTML report saved at: {html_path}")
+            
+        except Exception as e:
+            logging.error(f"Error creating HTML report: {str(e)}")
 
 
 print("Model Trainer class initialized for Fraud Detection with SMOTE")

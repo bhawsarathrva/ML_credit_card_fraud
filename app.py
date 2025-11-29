@@ -1,4 +1,5 @@
-from flask import Flask, render_template, jsonify, request, send_file
+from flask import Flask, render_template, jsonify, request, send_file, send_from_directory
+from src.constant import artifact_folder
 from src.exception import CustomException
 from src.logger import logging as lg
 import os
@@ -169,11 +170,9 @@ def api_health():
         }), 503
 
 
-@app.route("/train", methods=['GET'])
+@app.route("/train", methods=['GET', 'POST'])
 def train_route():
-    wants_json = request.headers.get('Accept', '').find('application/json') != -1
-    
-    if not wants_json:
+    if request.method == 'GET':
         return render_template('train.html',
                              database_name=MONGO_DATABASE_NAME,
                              collection_name=MONGO_COLLECTION_NAME)
@@ -238,10 +237,10 @@ def upload():
             prediction_pipeline = PredictionPipeline(request)
             prediction_file_detail = prediction_pipeline.run_pipeline()
 
-            lg.info("Prediction completed. Downloading prediction file.")
+            lg.info("Prediction completed. Downloading prediction report.")
             return send_file(
-                prediction_file_detail.prediction_file_path,
-                download_name=prediction_file_detail.prediction_file_name,
+                prediction_file_detail.report_file_path,
+                download_name=prediction_file_detail.report_file_name,
                 as_attachment=True
             )
         else:
@@ -295,6 +294,47 @@ def mongodb_status():
             "error": str(e)
         }), 503
 
+@app.route("/training/report")
+def training_report():
+    """
+    Serve the HTML training report
+    """
+    try:
+        report_path = os.path.join(artifact_folder, "model_report.html")
+        if os.path.exists(report_path):
+            return send_file(report_path)
+        else:
+            return "Training report not found. Please train the model first.", 404
+    except Exception as e:
+        return str(e), 500
+
+@app.route("/training/visualizations/<path:filename>")
+def serve_visualization(filename):
+    """
+    Serve visualization images for the training report
+    """
+    try:
+        viz_dir = os.path.join(artifact_folder, "visualizations")
+        return send_from_directory(viz_dir, filename)
+    except Exception as e:
+        return str(e), 404
+
+@app.route("/predictions/visualizations/<path:filename>")
+def serve_prediction_visualization(filename):
+    """
+    Serve prediction visualization images
+    """
+    try:
+        viz_dir = os.path.join("predictions", "visualizations")
+        return send_from_directory(viz_dir, filename)
+    except Exception as e:
+        return str(e), 404
+@app.route("/prediction/visualizations")
+def prediction_visualizations_page():
+    """
+    Render prediction visualization page
+    """
+    return render_template('prediction_viz.html')
 
 if __name__ == "__main__":
     lg.info("Starting Flask application...")
@@ -303,4 +343,4 @@ if __name__ == "__main__":
     else:
         lg.warning("MongoDB connection failed. Application will start but training may fail.")
     
-    app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)
+    app.run(host="0.0.0.0", port=3000, debug=True, use_reloader=False)

@@ -15,12 +15,12 @@ A **production-ready Credit Card Fraud Detection System** that uses advanced mac
 
 ### ✨ Key Features
 
-- 🔍 **Advanced Fraud Detection** - SMOTE-Tomek algorithm for handling class imbalance
+- 🔍 **Advanced Fraud Detection** - SMOTE-Tomek & KNN-SMOTE comparison
 - 🗄️ **MongoDB Integration** - Scalable data storage and retrieval
 - 🤖 **Multiple ML Models** - Evaluates 7 different classifiers automatically
 - 📊 **Comprehensive Metrics** - Precision, Recall, F1-Score, ROC-AUC
-- 🌐 **Web Interface** - User-friendly Flask application
-- 📈 **Detailed Reporting** - Model performance analysis and comparison
+- 🌐 **Web Interface** - User-friendly Flask application with Visualizations
+- 📈 **Detailed Reporting** - HTML reports, ROC curves, Confusion Matrices
 - 🚀 **Production Ready** - Error handling, logging, and documentation
 
 ---
@@ -59,17 +59,15 @@ cd credit-card-fraud-detection
 
 # 2. Activate virtual environment
 .\venv\Scripts\activate  # Windows
-source venv/bin/activate  # Linux/Mac
 
 # 3. Install dependencies
-pip install -r requirements_fixed.txt
+pip install -r requirements.txt
 
 # 4. Generate sample data (for testing)
 python generate_sample_data.py
 
 # 5. Start the application
 .\run_app.bat  # Windows
-python app.py  # Linux/Mac
 ```
 
 ### Access the Application
