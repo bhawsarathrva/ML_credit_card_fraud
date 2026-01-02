@@ -1,13 +1,7 @@
-# ============================================
-# Python
-# ============================================
-# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-
-# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -25,41 +19,23 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
-
-# PyInstaller
 *.manifest
 *.spec
-
-# ============================================
-# Virtual Environments
-# ============================================
 venv/
 env/
 ENV/
 env.bak/
 venv.bak/
 .venv/
-
-# ============================================
-# IDE / Editors
-# ============================================
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
 .DS_Store
-
-# ============================================
-# Jupyter Notebook
-# ============================================
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 test.ipynb
-
-# ============================================
-# Testing / Coverage
-# ============================================
 .pytest_cache/
 .coverage
 .coverage.*
@@ -70,24 +46,14 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
-
-# ============================================
-# Logs
-# ============================================
 *.log
 logs/
 pip-log.txt
 pip-delete-this-directory.txt
-
-# ============================================
-# Environment Variables & Secrets
-# ============================================
 .env
 .env.local
 .env.*.local
 *.env
-
-# Security - Credentials and Keys
 *.pem
 *.key
 *.p12
@@ -101,11 +67,6 @@ secrets.yaml
 secrets.yml
 .aws/
 .ssh/
-
-# ============================================
-# ML / Data Science Specific
-# ============================================
-# Model artifacts
 artifacts/
 *.pkl
 *.h5
@@ -114,72 +75,35 @@ artifacts/
 *.pth
 *.onnx
 *.pb
-
-# Data files (keep dataset in notebooks/)
-# Uncomment if you don't want to track large datasets
-# *.csv
-# *.json
-# *.parquet
-
-# Predictions and outputs
 prediction_artifacts/
 predictions/
 outputs/
-
-# ML framework specific
 catboost_info/
 .catboost_info/
 mlruns/
 wandb/
 
-# ============================================
-# Flask Specific
-# ============================================
 instance/
 .webassets-cache
-
-# ============================================
-# Database
-# ============================================
 *.db
 *.sqlite
 *.sqlite3
 db.sqlite3
 db.sqlite3-journal
-
-# ============================================
-# OS Specific
-# ============================================
 .DS_Store
 Thumbs.db
 desktop.ini
-
-# ============================================
-# Project Specific
-# ============================================
 demo.py
 temp/
 tmp/
 scratch/
-
-# ============================================
-# Documentation Build
-# ============================================
 docs/_build/
 /site
-
-# ============================================
-# Type Checkers
-# ============================================
 .mypy_cache/
 .dmypy.json
 dmypy.json
 .pyre/
 .pytype/
-
-# ============================================
-# Other
-# ============================================
 *.bak
 *.swp
 *~
